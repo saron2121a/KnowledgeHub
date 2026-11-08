@@ -1,0 +1,11 @@
+Redis is an in-memory data store often used as a cache in front of a slower database.
+
+A cache hit returns stored data without touching the database. A cache miss follows the normal data path and then stores the result.
+
+A TTL (time to live) makes a cached entry expire automatically after a set number of seconds.
+
+Read replicas copy changes from the primary database and serve read traffic. They can lag behind the primary, so reads that must see a just-completed write need special routing.
+
+An index is an extra data structure that lets a database locate records without scanning the whole table. It speeds up reads but adds work to every write.
+
+A cache invalidation event occurs when a change to the document corpus makes previously cached answers outdated.

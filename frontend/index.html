@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KnowledgeHub</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <aside>
+      <h1>KnowledgeHub</h1>
+      <h2>Documents</h2>
+      <input type="file" id="file" accept=".txt" />
+      <button id="upload">Upload &amp; index</button>
+      <p id="upload-msg" class="muted"></p>
+      <ul id="docs"></ul>
+    </aside>
+
+    <main>
+      <div id="chat"></div>
+
+      <div id="metrics" class="muted">
+        Ask a question to see cache status and timings.
+      </div>
+
+      <div class="scope-row">
+        <label for="scope">Ask about:</label>
+        <select id="scope">
+          <option value="">All documents</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <input
+          id="question"
+          placeholder="Ask about your documents..."
+          maxlength="1000"
+        />
+        <button id="ask">Ask</button>
+        <button id="compare" class="secondary">Compare retrieval</button>
+        <button id="newchat" class="secondary">New chat</button>
+      </div>
+
+      <p class="muted">
+        Exact repeated questions can use the cache. Follow-up questions use chat
+        history and bypass the cache.
+      </p>
+
+      <pre id="compare-out"></pre>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

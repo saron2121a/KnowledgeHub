@@ -1,0 +1,3 @@
+The Bluebird project uses PostgreSQL as its database.
+Its application is designed for managing university library books.
+The project was developed using Python and FastAPI.
