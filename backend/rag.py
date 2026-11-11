@@ -290,45 +290,95 @@ def compare(
     question: str,
     document: str | None = None,
 ) -> dict:
-    """Show which passages each enabled retrieval method selects."""
-    ref = lambda ps: [
-        {"source": p["source"], "chunk": p["chunk"]}
-        for p in ps
-    ]
+    """
+    Compare vector and hybrid retrieval independently.
 
-    hyb = (
-        retrieval.hybrid_search(
-            question, config.CANDIDATES, document
-        )
-        if config.USE_HYBRID
-        else None
+    This function measures retrieval latency only. It does not use
+    Redis caching or generate an answer with Ollama.
+    """
+
+    def ref(passages):
+        """Return only the source and chunk identifiers."""
+        return [
+            {
+                "source": p["source"],
+                "chunk": p["chunk"],
+            }
+            for p in passages
+        ]
+
+    # 1. Run vector retrieval and measure its execution time.
+    start = time.perf_counter()
+
+    vector_results = retrieval.vector_search(
+        question, config.TOP_K, document
     )
 
-    out = {
-        "vector": ref(
-            retrieval.vector_search(
-                question, config.TOP_K, document
-            )
-        ),
-        "hybrid": (
-            ref(hyb[:config.TOP_K])
-            if hyb is not None
-            else None
-        ),
-        "reranked": None,
+    vector_ms = round(
+        (time.perf_counter() - start) * 1000, 2
+    )
+
+    # 2. Run hybrid retrieval independently and measure its execution time.
+    start = time.perf_counter()
+
+    hybrid_candidates = retrieval.hybrid_search(
+        question, config.CANDIDATES, document
+    )
+
+    hybrid_ms = round(
+        (time.perf_counter() - start) * 1000, 2
+    )
+
+    # Compare the same number of final results from both methods.
+    hybrid_results = hybrid_candidates[:config.TOP_K]
+
+    vector_refs = ref(vector_results)
+    hybrid_refs = ref(hybrid_results)
+
+    # 3. Calculate how much the two result sets overlap.
+    vector_keys = {
+        (p["source"], p["chunk"])
+        for p in vector_refs
     }
 
+    hybrid_keys = {
+        (p["source"], p["chunk"])
+        for p in hybrid_refs
+    }
+
+    shared = vector_keys & hybrid_keys
+    vector_only = vector_keys - hybrid_keys
+    hybrid_only = hybrid_keys - vector_keys
+
+    # 4. Prepare the comparison response.
+    out = {
+        "vector": vector_refs,
+        "hybrid": hybrid_refs,
+        "timings_ms": {
+            "vector": vector_ms,
+            "hybrid": hybrid_ms,
+        },
+        "overlap": {
+            "shared": len(shared),
+            "vector_only": len(vector_only),
+            "hybrid_only": len(hybrid_only),
+        },
+        "reranked": None,
+        "rerank_ms": None,
+    }
+
+    # 5. Reranking remains optional and does not affect Ask.
     if config.USE_RERANK:
-        pool = (
-            hyb
-            if hyb is not None
-            else retrieval.vector_search(
-                question, config.CANDIDATES, document
-            )
-        )
+        start = time.perf_counter()
 
         picked, status = reranker.rerank(
-            question, pool, config.TOP_K
+            question,
+            hybrid_candidates,
+            config.TOP_K,
+        )
+
+        out["rerank_ms"] = round(
+            (time.perf_counter() - start) * 1000, 2
         )
 
         out["reranked"] = (

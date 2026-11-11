@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 
 let history = [];
+let isAsking = false;
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
@@ -148,9 +149,21 @@ function showMetrics(d) {
 }
 
 async function ask() {
+  if (isAsking) return;
+
   const q = $("question").value.trim();
 
   if (!q) return;
+
+  isAsking = true;
+
+  const askButton = $("ask");
+  const compareButton = $("compare");
+  const originalAskText = askButton.textContent;
+
+  askButton.disabled = true;
+  compareButton.disabled = true;
+  askButton.textContent = "Processing...";
 
   $("question").value = "";
   addMsg("user", q);
@@ -175,6 +188,11 @@ async function ask() {
     );
   } catch (e) {
     addMsg("bot", "Error: " + e.message);
+  } finally {
+    isAsking = false;
+    askButton.disabled = false;
+    compareButton.disabled = false;
+    askButton.textContent = originalAskText;
   }
 }
 

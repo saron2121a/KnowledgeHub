@@ -1,7 +1,25 @@
+# Environment variables and secrets
 .env
+
+# Python virtual environments
 .venv/
+.venv313/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated databases and application data
 chroma_db/
 data/
-__pycache__/
-*.pyc
-.pytest_cache/
+
+# Server logs
+*.log
+
+# IDE and operating system files
+.vscode/
+.DS_Store
+Thumbs.db
+# Original assignment starter files
+starter_files/

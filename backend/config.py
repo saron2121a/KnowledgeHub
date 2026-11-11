@@ -21,6 +21,10 @@ OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", 180))
 
 USE_HYBRID = os.getenv("USE_HYBRID", "false").lower() == "true"
 USE_RERANK = os.getenv("USE_RERANK", "false").lower() == "true"
+RERANK_MODEL = os.getenv(
+    "RERANK_MODEL",
+    "cross-encoder/ms-marco-TinyBERT-L2-v2"
+)
 
 CANDIDATES = 15      # passages fetched before reranking
 TOP_K = 3            # passages sent to the LLM

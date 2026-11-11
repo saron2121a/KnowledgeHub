@@ -6,5 +6,4 @@ redis
 chromadb
 rank-bm25
 sentence-transformers
-anthropic
 pytest
